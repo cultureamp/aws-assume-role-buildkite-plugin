@@ -4,8 +4,12 @@ set -o pipefail
 set -u
 
 main() {
-  local role="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE:-}"
+  local env_name="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ENV:-"DEFAULT_ROLE"}"
+  local default_role=${!env_name:-}
+  local role="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE:-$default_role}"
   local build="${BUILDKITE_BUILD_NUMBER:-}"
+
+  echo "role: ${role}"
 
   if [[ -n $role && -n $build ]]; then
     echo "~~~ Assuming IAM role $role ..."
@@ -16,7 +20,7 @@ main() {
     echo "  AWS_SECRET_ACCESS_KEY=(${#AWS_SECRET_ACCESS_KEY} chars)"
     echo "  AWS_SESSION_TOKEN=(${#AWS_SESSION_TOKEN} chars)"
   else
-    echo >&2 "Missing BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE or BUILDKITE_BUILD_NUMBER"
+    echo >&2 "Missing BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE or BUILDKITE_BUILD_NUMBER or $env_name"
   fi
 }
 
