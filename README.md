@@ -3,7 +3,7 @@ AWS AssumeRole Buildkite Plugin
 
 A [Buildkite plugin](https://buildkite.com/docs/agent/plugins) to assume an IAM Role before running the build command.
 
-Credentials for the assumed role are placed in the environment as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SECRET_ACCESS_KEY`, where they will be found by standard AWS tools and SDKs.
+Credentials for the assumed role are placed in the environment as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, where they will be found by standard AWS tools and SDKs.
 
 The assumed role session expires after one hour, which is the default and maximum duration for the [AssumeRole API](http://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html).
 
