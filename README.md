@@ -19,17 +19,16 @@ steps:
         role: arn:aws:iam::123456789012:role/example-role
 ```
 
-Alternatively,
+Alternatively, you could specify `AWS_ASSUME_ROLE_ARN` in your environment
 
 ```yaml
 steps:
   - command: bin/ci-aws-thing
+    env:
+      AWS_ASSUME_ROLE_ARN: arn:aws:iam::123456789012:role/example-role
     plugins:
-      cultureamp/aws-assume-role:
-        env: ROLE_ARN
+      cultureamp/aws-assume-role
 ```
-
-where `ROLE_ARN` is defined on execution (e.g. `ROLE_ARN=arn:aws:iam::123456789012:role/example-role`)
 
 Options
 -------
@@ -37,10 +36,6 @@ Options
 ### `role`
 
 The ARN of the IAM Role to assume. The build agent must already be authenticated (e.g. EC2 instance role) and have `sts:AssumeRole` permission for the role being assumed.
-
-### `env`
-
-The environment variable name which holds the ARN of the IAM Role to assume.
 
 References
 ----------
