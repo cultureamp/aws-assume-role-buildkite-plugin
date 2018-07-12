@@ -11,12 +11,12 @@ Example
 -------
 
 
-```yaml
+```yml
 steps:
   - command: bin/ci-aws-thing
     plugins:
-      cultureamp/aws-assume-role:
-        role: arn:aws:iam::123456789012:role/example-role
+      cultureamp/aws-assume-role#v0.1.0:
+        role: "arn:aws:iam::123456789012:role/example-role"
 ```
 
 Alternatively, you could specify `AWS_ASSUME_ROLE_ARN` in your environment

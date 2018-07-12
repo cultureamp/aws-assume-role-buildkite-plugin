@@ -1,0 +1,6 @@
+{
+  "SecretAccessKey": "foo",
+  "SessionToken": "bar",
+  "Expiration": "...",
+  "AccessKeyId": "baz"
+}
