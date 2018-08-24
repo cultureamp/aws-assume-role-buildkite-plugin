@@ -9,7 +9,8 @@ main() {
 
   if [[ -n $role && -n $build ]]; then
     echo "~~~ Assuming IAM role $role ..."
-    eval "$(assume_role_credentials "$role" "$build" | credentials_json_to_shell_exports)"
+    local exports; exports="$(assume_role_credentials "$role" "$build" | credentials_json_to_shell_exports)"
+    eval "$exports"
 
     echo "Exported session credentials:"
     echo "  AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
