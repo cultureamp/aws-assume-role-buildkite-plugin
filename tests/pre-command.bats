@@ -10,9 +10,10 @@ load "$BATS_PATH/load.bash"
   export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --query Credentials : cat tests/sts.json"
-  
+
   run $PWD/hooks/pre-command
-  
+
+  assert_output --partial "~~~ Assuming IAM role role123 ..."
   assert_output --partial "Exported session credentials"
   assert_output --partial "AWS_ACCESS_KEY_ID=baz"
   assert_output --partial "AWS_SECRET_ACCESS_KEY=(3 chars)"
