@@ -37,12 +37,17 @@ Options
 
 The ARN of the IAM Role to assume. The build agent must already be authenticated (e.g. EC2 instance role) and have `sts:AssumeRole` permission for the role being assumed.
 
+### `duration` (optional)
+
+The duration (in seconds) to assume the role for. Defaults to 3600 (1 hour).
+
 References
 ----------
 
 * [Creating a Role to Delegate Permissions to an IAM User](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html)
 * [Requesting Temporary Security Credentials](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html#stsapi_comparison)
 * [AWS STS AssumeRole API](http://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html)
+* [Checking the Maximum Session Duration for a Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html#id_roles_use_view-role-max-session)
 
 License
 -------

@@ -9,7 +9,7 @@ load "$BATS_PATH/load.bash"
   export BUILDKITE_BUILD_NUMBER="42"
   export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
 
-  stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --query Credentials : cat tests/sts.json"
+  stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : cat tests/sts.json"
 
   run $PWD/hooks/pre-command
 
@@ -27,7 +27,7 @@ load "$BATS_PATH/load.bash"
   export BUILDKITE_BUILD_NUMBER="42"
   export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
 
-  stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --query Credentials : echo 'Not authorized to perform sts:AssumeRole' >&2; false"
+  stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : echo 'Not authorized to perform sts:AssumeRole' >&2; false"
 
   run $PWD/hooks/pre-command
 
@@ -37,5 +37,24 @@ Not authorized to perform sts:AssumeRole
 EOF
   assert_failure
 
+  unstub aws
+}
+
+@test "calls aws sts with custom duration" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_DURATION="43200"
+
+  stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 43200 --query Credentials : cat tests/sts.json"
+
+  run $PWD/hooks/pre-command
+
+  assert_output --partial "~~~ Assuming IAM role role123 ..."
+  assert_output --partial "Exported session credentials"
+  assert_output --partial "AWS_ACCESS_KEY_ID=baz"
+  assert_output --partial "AWS_SECRET_ACCESS_KEY=(3 chars)"
+  assert_output --partial "AWS_SESSION_TOKEN=(3 chars)"
+
+  assert_success
   unstub aws
 }
