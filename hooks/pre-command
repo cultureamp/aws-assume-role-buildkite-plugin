@@ -59,4 +59,6 @@ credentials_json_to_shell_exports() {
     | grep "^export AWS"
 }
 
+echo "DERP DERP DERP"
+
 main
