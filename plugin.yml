@@ -5,6 +5,8 @@ requirements:
   - aws
 configuration:
   properties:
+    duration:
+      type: string
     role:
       type: string
   required:
