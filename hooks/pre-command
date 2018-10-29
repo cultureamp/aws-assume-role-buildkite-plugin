@@ -1,65 +1,29 @@
 #!/usr/bin/env bash
-set -e
-set -o pipefail
-set -u
+set -e -o pipefail -u
 
 main() {
   local role="${AWS_ASSUME_ROLE_ARN:-${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE:-}}"
   local build="${BUILDKITE_BUILD_NUMBER:-}"
   local duration="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_DURATION:-3600}"
 
-  if [[ -n $role && -n $build ]]; then
-    echo "~~~ Assuming IAM role $role ..."
-    local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" | credentials_json_to_shell_exports)"
-    eval "$exports"
-
-    echo "Exported session credentials:"
-    echo "  AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
-    echo "  AWS_SECRET_ACCESS_KEY=(${#AWS_SECRET_ACCESS_KEY} chars)"
-    echo "  AWS_SESSION_TOKEN=(${#AWS_SESSION_TOKEN} chars)"
-  else
+  if [[ -z $role || -z $build ]]; then
     echo >&2 "Missing BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE or BUILDKITE_BUILD_NUMBER or AWS_ASSUME_ROLE_ARN"
+    exit 1
   fi
-}
 
-# Assume the IAM role $1, for duration $3, and allocate a session name derived from $2.
-# output: the Credentials portion of the AWS response JSON;
-#     {
-#         "SecretAccessKey": "foo"
-#         "SessionToken": "bar",
-#         "Expiration": "...",
-#         "AccessKeyId": "baz"
-#     }
-assume_role_credentials() {
-  local role="$1"
-  local build="$2"
-  local duration="$3"
-  aws sts assume-role \
-    --role-arn "$role" \
-    --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
-    --duration-seconds "$duration" \
-    --query Credentials
-}
-
-# Convert credentials JSON to shell export statements using standard CLI tools
-# input:
-#     {
-#         "SecretAccessKey": "foo"
-#         "SessionToken": "bar",
-#         "Expiration": "...",
-#         "AccessKeyId": "baz"
-#     }
-# output:
-#     export AWS_SECRET_ACCESS_KEY="foo"
-#     export AWS_SESSION_TOKEN="bar"
-#     export AWS_ACCESS_KEY_ID="baz"
-credentials_json_to_shell_exports() {
-  sed \
-    -e 's/ *"\(.*\)": \(".*"\),*/\1=\2/g' \
-    -e 's/^SecretAccessKey/export AWS_SECRET_ACCESS_KEY/' \
-    -e 's/^AccessKeyId/export AWS_ACCESS_KEY_ID/' \
-    -e 's/^SessionToken/export AWS_SESSION_TOKEN/' \
-    | grep "^export AWS"
+  echo "~~~ Assuming IAM role $role ..."
+  read -r AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN < <(
+    aws sts assume-role \
+      --role-arn "$role" \
+      --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
+      --duration-seconds "$duration" \
+      --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+      --output text
+  )
+  echo "Exported session credentials:"
+  echo "  AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
+  echo "  AWS_SECRET_ACCESS_KEY=(${#AWS_SECRET_ACCESS_KEY} chars)"
+  echo "  AWS_SESSION_TOKEN=(${#AWS_SESSION_TOKEN} chars)"
 }
 
 main
