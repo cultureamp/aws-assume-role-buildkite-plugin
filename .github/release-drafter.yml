@@ -1,0 +1,16 @@
+# Config for https://github.com/apps/release-drafter
+template: |
+  ## What's changed?
+
+  $CHANGES
+
+  ## Upgrading
+  To upgrade, update your `pipeline.yml` files:
+
+  ```diff
+    steps:
+      - plugins:
+  -       - seedrs/aws-assume-role#$PREVIOUS_TAG:
+  +       - seedrs/aws-assume-role#TODO:
+              role: "arn:aws:iam::123456789012:role/example-role"
+  ```
