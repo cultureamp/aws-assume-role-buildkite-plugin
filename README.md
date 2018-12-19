@@ -41,6 +41,14 @@ The ARN of the IAM Role to assume. The build agent must already be authenticated
 
 The duration (in seconds) to assume the role for. Defaults to 3600 (1 hour).
 
+## Developing
+
+To run the tests:
+
+```bash
+docker-compose run --rm tests
+```
+
 References
 ----------
 
