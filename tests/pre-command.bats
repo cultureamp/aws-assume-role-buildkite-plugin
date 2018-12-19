@@ -13,7 +13,8 @@ load "$BATS_PATH/load.bash"
 
   run $PWD/hooks/pre-command
 
-  assert_output --partial "~~~ Assuming IAM role role123 ..."
+  assert_output --partial "~~~ :aws-iam: Assuming IAM role ..."
+  assert_output --partial "Role: role123"
   assert_output --partial "Exported session credentials"
   assert_output --partial "AWS_ACCESS_KEY_ID=baz"
   assert_output --partial "AWS_SECRET_ACCESS_KEY=(3 chars)"
@@ -32,7 +33,7 @@ load "$BATS_PATH/load.bash"
   run $PWD/hooks/pre-command
 
   assert_output <<EOF
-~~~ Assuming IAM role role123 ...
+~~~ :aws-iam: Assuming IAM role ...
 Not authorized to perform sts:AssumeRole
 EOF
   assert_failure
@@ -49,7 +50,8 @@ EOF
 
   run $PWD/hooks/pre-command
 
-  assert_output --partial "~~~ Assuming IAM role role123 ..."
+  assert_output --partial "~~~ :aws-iam: Assuming IAM role ..."
+  assert_output --partial "Role: role123"
   assert_output --partial "Exported session credentials"
   assert_output --partial "AWS_ACCESS_KEY_ID=baz"
   assert_output --partial "AWS_SECRET_ACCESS_KEY=(3 chars)"
