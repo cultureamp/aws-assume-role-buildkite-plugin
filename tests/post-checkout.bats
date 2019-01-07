@@ -11,7 +11,7 @@ load "$BATS_PATH/load.bash"
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : cat tests/sts.json"
 
-  run $PWD/hooks/pre-command
+  run $PWD/hooks/post-checkout
 
   assert_output --partial "~~~ :aws-iam: Assuming IAM role ..."
   assert_output --partial "Role: role123"
@@ -30,7 +30,7 @@ load "$BATS_PATH/load.bash"
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : echo 'Not authorized to perform sts:AssumeRole' >&2; false"
 
-  run $PWD/hooks/pre-command
+  run $PWD/hooks/post-checkout
 
   assert_output <<EOF
 ~~~ :aws-iam: Assuming IAM role ...
@@ -48,7 +48,7 @@ EOF
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 43200 --query Credentials : cat tests/sts.json"
 
-  run $PWD/hooks/pre-command
+  run $PWD/hooks/post-checkout
 
   assert_output --partial "~~~ :aws-iam: Assuming IAM role ..."
   assert_output --partial "Role: role123"
