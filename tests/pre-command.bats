@@ -72,3 +72,16 @@ EOF
   assert_output --partial "AWS_REGION=eu-central-1"
 
 }
+
+@test "does not pass in a custom region" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+
+  stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : cat tests/sts.json"
+
+  run $PWD/hooks/pre-command
+  assert_output --partial "~~~ Assuming IAM role role123 ..."
+  refute_output --partial "AWS_DEFAULT_REGION="
+  refute_output --partial "AWS_REGION="
+
+}
