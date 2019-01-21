@@ -71,6 +71,8 @@ EOF
   assert_output --partial "AWS_DEFAULT_REGION=eu-central-1"
   assert_output --partial "AWS_REGION=eu-central-1"
 
+  assert_success
+  unstub aws
 }
 
 @test "does not pass in a custom region" {
@@ -83,5 +85,8 @@ EOF
   assert_output --partial "~~~ Assuming IAM role role123 ..."
   refute_output --partial "AWS_DEFAULT_REGION="
   refute_output --partial "AWS_REGION="
+
+  assert_success
+  unstub aws
 
 }
