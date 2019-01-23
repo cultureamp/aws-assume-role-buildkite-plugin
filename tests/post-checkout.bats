@@ -13,7 +13,7 @@ load "$BATS_PATH/load.bash"
 
   run $PWD/hooks/post-checkout
 
-  assert_output --partial "~~~ :aws-iam: Assuming IAM role ..."
+  assert_output --partial "~~~ :aws-iam: Assuming IAM role"
   assert_output --partial "Role: role123"
   assert_output --partial "Exported session credentials"
   assert_output --partial "AWS_ACCESS_KEY_ID=baz"
@@ -33,7 +33,7 @@ load "$BATS_PATH/load.bash"
   run $PWD/hooks/post-checkout
 
   assert_output <<EOF
-~~~ :aws-iam: Assuming IAM role ...
+~~~ :aws-iam: Assuming IAM role
 Not authorized to perform sts:AssumeRole
 EOF
   assert_failure
@@ -50,7 +50,7 @@ EOF
 
   run $PWD/hooks/post-checkout
 
-  assert_output --partial "~~~ :aws-iam: Assuming IAM role ..."
+  assert_output --partial "~~~ :aws-iam: Assuming IAM role"
   assert_output --partial "Role: role123"
   assert_output --partial "Exported session credentials"
   assert_output --partial "AWS_ACCESS_KEY_ID=baz"

@@ -9,7 +9,7 @@ main() {
   local duration="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_DURATION:-3600}"
 
   if [[ -n $role && -n $build ]]; then
-    echo "~~~ :aws-iam: Assuming IAM role ..."
+    echo "~~~ :aws-iam: Assuming IAM role"
     local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" | credentials_json_to_shell_exports)"
     eval "$exports"
 

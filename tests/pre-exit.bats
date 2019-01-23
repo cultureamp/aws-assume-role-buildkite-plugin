@@ -14,7 +14,7 @@ load "$BATS_PATH/load.bash"
 
     run $PWD/hooks/post-checkout
 
-    assert_output --partial "~~~ :aws-iam: Assuming IAM role ..."
+    assert_output --partial "~~~ :aws-iam: Assuming IAM role"
     assert_output --partial "Role: role123"
     assert_output --partial "Exported session credentials"
     assert_output --partial "AWS_ACCESS_KEY_ID=baz"
@@ -25,7 +25,7 @@ load "$BATS_PATH/load.bash"
 
     run $PWD/hooks/pre-exit
 
-    assert_output --partial "~~~ :aws-iam: Cleaning IAM role environment ..."
+    assert_output --partial "~~~ :aws-iam: Cleaning IAM role environment"
 
     assert_success
     unstub aws
