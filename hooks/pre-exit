@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+set -u
+
+# Cleanup environment variables after the job finishes, so the Buildkite agent
+# doesn't keep the permissions of the role while executing other jobs.
+
+echo "~~~ :aws-iam: Cleaning IAM role environment ..."
+unset AWS_ACCESS_KEY_ID
+unset AWS_SECRET_ACCESS_KEY
+unset AWS_SESSION_TOKEN
