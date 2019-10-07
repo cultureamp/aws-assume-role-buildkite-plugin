@@ -9,6 +9,8 @@ configuration:
       type: string
     role:
       type: string
+    profile:
+      type: string
   required:
     - role
   additionalProperties: false

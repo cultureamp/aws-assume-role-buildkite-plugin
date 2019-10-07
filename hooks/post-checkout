@@ -7,10 +7,11 @@ main() {
   local role="${AWS_ASSUME_ROLE_ARN:-${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE:-}}"
   local build="${BUILDKITE_BUILD_NUMBER:-}"
   local duration="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_DURATION:-3600}"
+  local profile="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_PROFILE:-}"
 
   if [[ -n $role && -n $build ]]; then
     echo "~~~ :aws-iam: Assuming IAM role"
-    local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" | credentials_json_to_shell_exports)"
+    local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" "$profile" | credentials_json_to_shell_exports)"
     eval "$exports"
 
     echo "Role: $role"
@@ -35,11 +36,22 @@ assume_role_credentials() {
   local role="$1"
   local build="$2"
   local duration="$3"
-  aws sts assume-role \
-    --role-arn "$role" \
-    --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
-    --duration-seconds "$duration" \
-    --query Credentials
+  local profile="${4:-}"
+
+  if [[ -n ${profile} ]]; then
+    aws sts assume-role \
+      --role-arn "$role" \
+      --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
+      --duration-seconds "$duration" \
+      --query Credentials \
+      --profile ${profile}
+  else
+    aws sts assume-role \
+      --role-arn "$role" \
+      --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
+      --duration-seconds "$duration" \
+      --query Credentials
+  fi
 }
 
 # Convert credentials JSON to shell export statements using standard CLI tools
