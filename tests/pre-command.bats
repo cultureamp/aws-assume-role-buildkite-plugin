@@ -21,7 +21,7 @@ load "$BATS_PATH/load.bash"
   run $PWD/hooks/pre-command
 
   assert_output --partial "~~~ Assuming IAM role role123 ..."
-  assert_output --partial "Exported session credentials"
+  assert_output --partial "AWS session credentials"
   assert_output --partial "AWS_ACCESS_KEY_ID=foo"
   assert_output --partial "AWS_SECRET_ACCESS_KEY=(4 chars)"
   assert_output --partial "AWS_SESSION_TOKEN=(5 chars)"
@@ -71,11 +71,43 @@ EOF
   run $PWD/hooks/pre-command
 
   assert_output --partial "~~~ Assuming IAM role role123 ..."
-  assert_output --partial "Exported session credentials"
+  assert_output --partial "AWS session credentials"
   assert_output --partial "AWS_ACCESS_KEY_ID=a"
   assert_output --partial "AWS_SECRET_ACCESS_KEY=(2 chars)"
   assert_output --partial "AWS_SESSION_TOKEN=(3 chars)"
 
   assert_success
   unstub aws
+}
+
+@test "passes in a custom region" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_REGION="eu-central-1"
+
+  stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials.[AccessKeyId,SecretAccessKey,SessionToken] : echo -e 'a\tb\tc'"
+
+  run $PWD/hooks/pre-command
+  assert_output --partial "~~~ Assuming IAM role role123 ..."
+  assert_output --partial "AWS_DEFAULT_REGION=eu-central-1"
+  assert_output --partial "AWS_REGION=eu-central-1"
+
+  assert_success
+  unstub aws
+}
+
+@test "does not pass in a custom region" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+
+  stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials.[AccessKeyId,SecretAccessKey,SessionToken] : echo -e 'a\tb\tc'"
+
+  run $PWD/hooks/pre-command
+  assert_output --partial "~~~ Assuming IAM role role123 ..."
+  refute_output --partial "AWS_DEFAULT_REGION="
+  refute_output --partial "AWS_REGION="
+
+  assert_success
+  unstub aws
+
 }

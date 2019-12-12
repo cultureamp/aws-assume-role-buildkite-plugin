@@ -5,6 +5,7 @@ main() {
   local role="${AWS_ASSUME_ROLE_ARN:-${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE:-}}"
   local build="${BUILDKITE_BUILD_NUMBER:-}"
   local duration="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_DURATION:-3600}"
+  local region="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_REGION:-""}"
 
   if [[ -z $role || -z $build ]]; then
     echo >&2 "Missing BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE or BUILDKITE_BUILD_NUMBER or AWS_ASSUME_ROLE_ARN"
@@ -20,10 +21,18 @@ main() {
       --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
       --output text
   )
+
   echo "AWS session credentials:"
   echo "  AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
   echo "  AWS_SECRET_ACCESS_KEY=(${#AWS_SECRET_ACCESS_KEY} chars)"
   echo "  AWS_SESSION_TOKEN=(${#AWS_SESSION_TOKEN} chars)"
+
+  if [[ -n $region ]]; then
+    AWS_REGION="$region"
+    AWS_DEFAULT_REGION="$region"
+    echo "  AWS_REGION=${AWS_REGION:-(not set)}"
+    echo "  AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-(not set)}"
+  fi
 }
 
 main

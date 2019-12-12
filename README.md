@@ -15,8 +15,8 @@ Example
 steps:
   - command: bin/ci-aws-thing
     plugins:
-      cultureamp/aws-assume-role#v0.1.0:
-        role: "arn:aws:iam::123456789012:role/example-role"
+      - cultureamp/aws-assume-role#v0.1.0:
+          role: "arn:aws:iam::123456789012:role/example-role"
 ```
 
 Alternatively, you could specify `AWS_ASSUME_ROLE_ARN` in your environment
@@ -27,7 +27,7 @@ steps:
     env:
       AWS_ASSUME_ROLE_ARN: arn:aws:iam::123456789012:role/example-role
     plugins:
-      cultureamp/aws-assume-role
+      - cultureamp/aws-assume-role
 ```
 
 Options
@@ -40,6 +40,16 @@ The ARN of the IAM Role to assume. The build agent must already be authenticated
 ### `duration` (optional)
 
 The duration (in seconds) to assume the role for. Defaults to 3600 (1 hour).
+
+### `region` (optional)
+
+Exports `AWS_REGION` and `AWS_DEFAULT_REGION` with the value you set. If not set the values of AWS_REGION and AWS_DEFAULT_REGION will not be changed.
+
+Development
+-----------
+
+Tests are written using bats with bats-mock and a docker compose file is provided to simplify testing.
+To run tests: `docker-compose run tests`
 
 References
 ----------
