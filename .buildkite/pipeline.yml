@@ -8,7 +8,7 @@ steps:
   - label: ":shell: Lint"
     plugins:
       plugin-linter#v2.0.0:
-        id: cultureamp/aws-assume-role
+        id: weillcomecollection/aws-assume-role
 
   - label: ":shell: Tests"
     plugins:

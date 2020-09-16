@@ -11,7 +11,7 @@ load "$BATS_PATH/load.bash"
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : cat tests/sts.json"
 
-  run $PWD/hooks/pre-command
+  run $PWD/hooks/environment
 
   assert_output --partial "~~~ Assuming IAM role role123 ..."
   assert_output --partial "Exported session credentials"
@@ -29,7 +29,7 @@ load "$BATS_PATH/load.bash"
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : echo 'Not authorized to perform sts:AssumeRole' >&2; false"
 
-  run $PWD/hooks/pre-command
+  run $PWD/hooks/environment
 
   assert_output <<EOF
 ~~~ Assuming IAM role role123 ...
@@ -47,7 +47,7 @@ EOF
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 43200 --query Credentials : cat tests/sts.json"
 
-  run $PWD/hooks/pre-command
+  run $PWD/hooks/environment
 
   assert_output --partial "~~~ Assuming IAM role role123 ..."
   assert_output --partial "Exported session credentials"
@@ -66,7 +66,7 @@ EOF
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : cat tests/sts.json"
 
-  run $PWD/hooks/pre-command
+  run $PWD/hooks/environment
   assert_output --partial "~~~ Assuming IAM role role123 ..."
   assert_output --partial "AWS_DEFAULT_REGION=eu-central-1"
   assert_output --partial "AWS_REGION=eu-central-1"
@@ -81,7 +81,7 @@ EOF
 
   stub aws "sts assume-role --role-arn role123 --role-session-name aws-assume-role-buildkite-plugin-42 --duration-seconds 3600 --query Credentials : cat tests/sts.json"
 
-  run $PWD/hooks/pre-command
+  run $PWD/hooks/environment
   assert_output --partial "~~~ Assuming IAM role role123 ..."
   refute_output --partial "AWS_DEFAULT_REGION="
   refute_output --partial "AWS_REGION="
