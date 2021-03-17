@@ -1,0 +1,9 @@
+site_name: ''
+site_description: ''
+
+plugins:
+  - techdocs-core
+
+nav:
+  - Overview:
+    - Placeholder: 'index.md'
