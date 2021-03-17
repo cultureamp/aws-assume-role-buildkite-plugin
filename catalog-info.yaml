@@ -1,0 +1,30 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: aws-assume-role-buildkite-plugin
+  description: 
+  links:
+    - title: Website
+      url: https://github.com/cultureamp/aws-assume-role-buildkite-plugin
+  # - title: Confluence
+  #   url: confluence.com/project-page
+  # - title: Monitoring Dashboard
+  #   url: datadog.com/this-service
+  # - title: Logs
+  #   url: splunk.com/service?filters
+  tags: # required and based on - https://cultureamp.atlassian.net/wiki/spaces/CPlatform/pages/1720156463/Authentication+-+One+Platform+Technical+Canvas
+    - tier-1
+  annotations:
+    github.com/project-slug: cultureamp/aws-assume-role-buildkite-plugin
+    github.com/team-slug: cultureamp/sre 
+    backstage.io/techdocs-ref: url:https://github.com/cultureamp/blob/master/aws-assume-role-buildkite-plugin
+    buildkite.com/project-slug: culture-amp/aws-assume-role-buildkite-plugin
+    # pagerduty.com/integration-key: optional
+spec:
+  type: default
+  owner: sre
+  # system: 
+  # subcomponentOf: 
+  # consumesApis: 
+  # providesApis: 
+  lifecycle: production
