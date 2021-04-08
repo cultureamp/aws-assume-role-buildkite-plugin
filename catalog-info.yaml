@@ -2,21 +2,19 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: aws-assume-role-buildkite-plugin
-  description: Buildkite plugin to assume IAM role before running command 
+  description: Open source buildkite plugin to assume IAM role before running command 
   links:
-    - title: Website
-      url: https://github.com/cultureamp/aws-assume-role-buildkite-plugin
+    - title: Buildkite Plugins
+      url: https://buildkite.com/plugins
   tags: 
-    - tier-1
-    - health-good
-    - users-na
+    - tier-2
+    - users-none
     - camp-platform
-    - data-none
+    - data-classification-none
   annotations:
     github.com/project-slug: cultureamp/aws-assume-role-buildkite-plugin
-    github.com/team-slug: cultureamp/sre 
-    backstage.io/techdocs-ref: url:https://github.com/cultureamp/blob/master/aws-assume-role-buildkite-plugin
+    github.com/team-slug: cultureamp/sre
 spec:
-  type: library
+  type: service
   owner: sre
   lifecycle: production
