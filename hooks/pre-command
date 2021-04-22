@@ -8,8 +8,19 @@ main() {
   local build="${BUILDKITE_BUILD_NUMBER:-}"
   local duration="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_DURATION:-3600}"
   local region="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_REGION:-""}"
+  local reset_session="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_RESET_SESSION:-"false"}"
 
   if [[ -n $role && -n $build ]]; then
+
+    if [[ "$reset_session" == "true" ]]; then
+      echo "Reset session credentials:"
+      unset AWS_ACCESS_KEY_ID
+      unset AWS_SECRET_ACCESS_KEY
+      unset AWS_SESSION_TOKEN
+      unset AWS_REGION
+      unset AWS_DEFAULT_REGION
+    fi
+
     echo "~~~ Assuming IAM role $role ..."
     local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" | credentials_json_to_shell_exports)"
     eval "$exports"

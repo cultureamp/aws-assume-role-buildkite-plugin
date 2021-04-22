@@ -33,6 +33,10 @@ steps:
 Options
 -------
 
+### `reset_session`
+
+Reset any previously set session. Default to `false`
+
 ### `role`
 
 The ARN of the IAM Role to assume. The build agent must already be authenticated (e.g. EC2 instance role) and have `sts:AssumeRole` permission for the role being assumed.
