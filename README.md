@@ -45,6 +45,10 @@ The duration (in seconds) to assume the role for. Defaults to 3600 (1 hour).
 
 Exports `AWS_REGION` and `AWS_DEFAULT_REGION` with the value you set. If not set the values of AWS_REGION and AWS_DEFAULT_REGION will not be changed.
 
+### `externalId` (optional)
+
+Used to pass through an externalId to the `sts:AssumeRole` command. This is used for assuming a role within another AWS account.
+
 Development
 -----------
 

@@ -8,10 +8,11 @@ main() {
   local build="${BUILDKITE_BUILD_NUMBER:-}"
   local duration="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_DURATION:-3600}"
   local region="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_REGION:-""}"
+  local externalId="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_EXTERNALID:-""}"
 
   if [[ -n $role && -n $build ]]; then
     echo "~~~ Assuming IAM role $role ..."
-    local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" | credentials_json_to_shell_exports)"
+    local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" "$externalId" | credentials_json_to_shell_exports)"
     eval "$exports"
 
     echo "Exported session credentials:"
@@ -43,11 +44,21 @@ assume_role_credentials() {
   local role="$1"
   local build="$2"
   local duration="$3"
-  aws sts assume-role \
-    --role-arn "$role" \
-    --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
-    --duration-seconds "$duration" \
+  local externalId="$4"
+
+  params=(
+    --role-arn "$role"
+    --role-session-name "aws-assume-role-buildkite-plugin-${build}"
+    --duration-seconds "$duration"
     --query Credentials
+  )
+
+  # Only add the externalId param if it exists - if it doesn't exist and we send empty string, AWS throws an error.
+  if [[ "$externalId" != "" ]]; then
+      params+=(--external-id "$externalId")
+  fi
+
+  aws sts assume-role "${params[@]}"
 }
 
 # Convert credentials JSON to shell export statements using standard CLI tools

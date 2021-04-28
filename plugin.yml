@@ -11,6 +11,8 @@ configuration:
       type: string
     region:
       type: string
+    externalId:
+      type: string
   required:
     - role
   additionalProperties: false
