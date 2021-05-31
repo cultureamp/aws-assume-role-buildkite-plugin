@@ -11,6 +11,8 @@ configuration:
       type: string
     region:
       type: string
+    reset_session:
+      type: string
   required:
     - role
   additionalProperties: false
