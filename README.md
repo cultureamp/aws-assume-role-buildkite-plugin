@@ -15,7 +15,7 @@ Example
 steps:
   - command: bin/ci-aws-thing
     plugins:
-      - cultureamp/aws-assume-role#v0.1.0:
+      - runlevel5/aws-assume-role#v0.1.0:
           role: "arn:aws:iam::123456789012:role/example-role"
 ```
 
@@ -27,7 +27,7 @@ steps:
     env:
       AWS_ASSUME_ROLE_ARN: arn:aws:iam::123456789012:role/example-role
     plugins:
-      - cultureamp/aws-assume-role
+      - runlevel5/aws-assume-role
 ```
 
 Options
