@@ -8,7 +8,7 @@ metadata:
     - title: Buildkite Plugins
       url: https://buildkite.com/plugins
   tags:
-    - camp-foundations
+    - camp-sre
     - data-internal-use-only
     - users-internal
   annotations:
