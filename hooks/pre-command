@@ -5,13 +5,13 @@ set -u
 
 main() {
   local role="${AWS_ASSUME_ROLE_ARN:-${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE:-}}"
-  local build="${BUILDKITE_BUILD_NUMBER:-}"
+  local job="${BUILDKITE_JOB_ID:-}"
   local duration="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_DURATION:-3600}"
   local region="${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_REGION:-""}"
 
-  if [[ -n $role && -n $build ]]; then
+  if [[ -n $role && -n $job ]]; then
     echo "~~~ Assuming IAM role $role ..."
-    local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" | credentials_json_to_shell_exports)"
+    local exports; exports="$(assume_role_credentials "$role" "$job" "$duration" | credentials_json_to_shell_exports)"
     eval "$exports"
 
     echo "Exported session credentials:"
@@ -41,11 +41,11 @@ main() {
 #     }
 assume_role_credentials() {
   local role="$1"
-  local build="$2"
+  local job="$2"
   local duration="$3"
   aws sts assume-role \
     --role-arn "$role" \
-    --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
+    --role-session-name "buildkitejobsession-${job}" \
     --duration-seconds "$duration" \
     --query Credentials
 }
