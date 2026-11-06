@@ -11,7 +11,9 @@ main() {
 
   if [[ -n $role && -n $build ]]; then
     echo "~~~ Assuming IAM role $role ..."
-    local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" | credentials_json_to_shell_exports)"
+    local session_name; session_name="$(build_session_name "${BUILDKITE_PIPELINE_SLUG:-}" "$build" "${BUILDKITE_STEP_KEY:-${BUILDKITE_JOB_ID:-}}")"
+    local tags_json; tags_json="$(session_tags_json)"
+    local exports; exports="$(assume_role_credentials "$role" "$session_name" "$duration" "$tags_json" | credentials_json_to_shell_exports)"
     eval "$exports"
 
     echo "Exported session credentials:"
@@ -31,7 +33,64 @@ main() {
   fi
 }
 
-# Assume the IAM role $1, for duration $3, and allocate a session name derived from $2.
+# Build an STS role session name of the form bk-<pipeline>-<build>-<step key or job id>.
+# STS allows 2-64 chars from [A-Za-z0-9+=,.@_-]; other chars are replaced with "_".
+# The pipeline slug is truncated first so the build number and step key/job id survive.
+build_session_name() {
+  local allowed_pattern='[^A-Za-z0-9+=,.@_-]'
+  local max_length=64
+  local pipeline="${1//$allowed_pattern/_}"
+  local build="${2//$allowed_pattern/_}"
+  local step="${3//$allowed_pattern/_}"
+
+  local suffix="-${build}"
+  if [[ -n $step ]]; then
+    suffix+="-${step}"
+  fi
+
+  local pipeline_budget=$(( max_length - 3 - ${#suffix} ))
+  if (( pipeline_budget < 0 )); then
+    pipeline_budget=0
+  fi
+
+  local name="bk-${pipeline:0:pipeline_budget}${suffix}"
+  echo "${name:0:max_length}"
+}
+
+# Build the STS --tags JSON from BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_<n>_KEY/_VALUE.
+# Prints nothing when no tags are configured; exits non-zero if a tag lacks a key or value.
+# output:
+#     [{"Key":"team","Value":"platform"},{"Key":"env","Value":"prod"}]
+session_tags_json() {
+  local prefix="BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS"
+  local index=0
+  local pairs=()
+
+  while true; do
+    local key_var="${prefix}_${index}_KEY"
+    local value_var="${prefix}_${index}_VALUE"
+    if [[ -z ${!key_var+x} && -z ${!value_var+x} ]]; then
+      break
+    fi
+    if [[ -z ${!key_var:-} ]]; then
+      echo >&2 "tags[$index] requires a key"
+      return 1
+    fi
+    if [[ -z ${!value_var+x} ]]; then
+      echo >&2 "tags[$index] requires a value"
+      return 1
+    fi
+    pairs+=("${!key_var}" "${!value_var}")
+    index=$(( index + 1 ))
+  done
+
+  if (( ${#pairs[@]} > 0 )); then
+    jq -cn '$ARGS.positional | [range(0; length; 2) as $i | {Key: .[$i], Value: .[$i + 1]}]' --args -- "${pairs[@]}"
+  fi
+}
+
+# Assume the IAM role $1, for duration $3, using the session name $2.
+# $4 is an optional JSON array of session tags for the STS --tags option.
 # output: the Credentials portion of the AWS response JSON;
 #     {
 #         "SecretAccessKey": "foo"
@@ -41,12 +100,18 @@ main() {
 #     }
 assume_role_credentials() {
   local role="$1"
-  local build="$2"
+  local session_name="$2"
   local duration="$3"
+  local tags_json="${4:-}"
+  local tag_args=()
+  if [[ -n $tags_json ]]; then
+    tag_args=(--tags "$tags_json")
+  fi
   aws sts assume-role \
     --role-arn "$role" \
-    --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
+    --role-session-name "$session_name" \
     --duration-seconds "$duration" \
+    "${tag_args[@]+"${tag_args[@]}"}" \
     --query Credentials
 }
 

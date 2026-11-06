@@ -3,6 +3,7 @@ description: Assumes an IAM Role before running the build command.
 author: https://github.com/cultureamp
 requirements:
   - aws
+  - jq
 configuration:
   properties:
     duration:
@@ -11,6 +12,19 @@ configuration:
       type: string
     region:
       type: string
+    tags:
+      type: array
+      items:
+        type: object
+        properties:
+          key:
+            type: string
+          value:
+            type: string
+        required:
+          - key
+          - value
+        additionalProperties: false
   required:
     - role
   additionalProperties: false
