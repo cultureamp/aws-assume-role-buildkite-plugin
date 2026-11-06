@@ -121,6 +121,86 @@ EOF
   unstub aws
 }
 
+@test "passes a single session tag" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_KEY="team"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_VALUE="platform"
+
+  stub aws "sts assume-role --role-arn role123 --role-session-name bk-my-pipeline-42-deploy --duration-seconds 3600 --tags '[{\"Key\":\"team\",\"Value\":\"platform\"}]' --query Credentials : cat tests/sts.json"
+
+  run $PWD/hooks/pre-command
+
+  assert_success
+  unstub aws
+}
+
+@test "passes multiple session tags in order" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_KEY="team"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_VALUE="platform"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_1_KEY="env"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_1_VALUE="prod"
+
+  stub aws "sts assume-role --role-arn role123 --role-session-name bk-my-pipeline-42-deploy --duration-seconds 3600 --tags '[{\"Key\":\"team\",\"Value\":\"platform\"},{\"Key\":\"env\",\"Value\":\"prod\"}]' --query Credentials : cat tests/sts.json"
+
+  run $PWD/hooks/pre-command
+
+  assert_success
+  unstub aws
+}
+
+@test "escapes quotes and backslashes in session tag values" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_KEY="note"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_VALUE='a,b=c "d" \e'
+
+  stub aws "sts assume-role --role-arn role123 --role-session-name bk-my-pipeline-42-deploy --duration-seconds 3600 --tags '[{\"Key\":\"note\",\"Value\":\"a,b=c \\\"d\\\" \\\\e\"}]' --query Credentials : cat tests/sts.json"
+
+  run $PWD/hooks/pre-command
+
+  assert_success
+  unstub aws
+}
+
+@test "allows an empty session tag value" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_KEY="team"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_VALUE=""
+
+  stub aws "sts assume-role --role-arn role123 --role-session-name bk-my-pipeline-42-deploy --duration-seconds 3600 --tags '[{\"Key\":\"team\",\"Value\":\"\"}]' --query Credentials : cat tests/sts.json"
+
+  run $PWD/hooks/pre-command
+
+  assert_success
+  unstub aws
+}
+
+@test "fails before calling aws when a session tag has no value" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_KEY="team"
+
+  run $PWD/hooks/pre-command
+
+  assert_failure
+  assert_output --partial "tags[0] requires a value"
+}
+
+@test "fails before calling aws when a session tag has no key" {
+  export BUILDKITE_BUILD_NUMBER="42"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"
+  export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_TAGS_0_VALUE="platform"
+
+  run $PWD/hooks/pre-command
+
+  assert_failure
+  assert_output --partial "tags[0] requires a key"
+}
+
 @test "does not pass in a custom region" {
   export BUILDKITE_BUILD_NUMBER="42"
   export BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_ROLE="role123"

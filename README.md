@@ -50,6 +50,23 @@ The duration (in seconds) to assume the role for. Defaults to 3600 (1 hour).
 
 Exports `AWS_REGION` and `AWS_DEFAULT_REGION` with the value you set. If not set the values of AWS_REGION and AWS_DEFAULT_REGION will not be changed.
 
+### `tags` (optional)
+
+A list of `key`/`value` pairs to attach to the role session as [STS session tags](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_session-tags.html). Both `key` and `value` are required; `value` may be empty. Keys are passed through as written.
+
+```yml
+steps:
+  - command: bin/ci-aws-thing
+    plugins:
+      - cultureamp/aws-assume-role#v0.1.0:
+          role: "arn:aws:iam::123456789012:role/example-role"
+          tags:
+            - key: team
+              value: platform
+```
+
+The target role's trust policy must allow `sts:TagSession` in addition to `sts:AssumeRole`, otherwise the assume-role call fails. Requires `jq` on the agent when tags are configured.
+
 Development
 -----------
 
