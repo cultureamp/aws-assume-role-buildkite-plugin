@@ -30,6 +30,11 @@ steps:
       - cultureamp/aws-assume-role
 ```
 
+Session name
+------------
+
+The role session name (visible in CloudTrail) is `bk-<pipeline slug>-<build number>-<step key>`. If the step has no `key`, the job ID is used instead. Characters STS rejects are replaced with `_`, and the pipeline slug is truncated so the name stays within the 64 character STS limit.
+
 Options
 -------
 

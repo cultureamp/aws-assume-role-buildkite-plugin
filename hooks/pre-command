@@ -11,7 +11,8 @@ main() {
 
   if [[ -n $role && -n $build ]]; then
     echo "~~~ Assuming IAM role $role ..."
-    local exports; exports="$(assume_role_credentials "$role" "$build" "$duration" | credentials_json_to_shell_exports)"
+    local session_name; session_name="$(build_session_name "${BUILDKITE_PIPELINE_SLUG:-}" "$build" "${BUILDKITE_STEP_KEY:-${BUILDKITE_JOB_ID:-}}")"
+    local exports; exports="$(assume_role_credentials "$role" "$session_name" "$duration" | credentials_json_to_shell_exports)"
     eval "$exports"
 
     echo "Exported session credentials:"
@@ -31,7 +32,31 @@ main() {
   fi
 }
 
-# Assume the IAM role $1, for duration $3, and allocate a session name derived from $2.
+# Build an STS role session name of the form bk-<pipeline>-<build>-<step key or job id>.
+# STS allows 2-64 chars from [A-Za-z0-9+=,.@_-]; other chars are replaced with "_".
+# The pipeline slug is truncated first so the build number and step key/job id survive.
+build_session_name() {
+  local allowed_pattern='[^A-Za-z0-9+=,.@_-]'
+  local max_length=64
+  local pipeline="${1//$allowed_pattern/_}"
+  local build="${2//$allowed_pattern/_}"
+  local step="${3//$allowed_pattern/_}"
+
+  local suffix="-${build}"
+  if [[ -n $step ]]; then
+    suffix+="-${step}"
+  fi
+
+  local pipeline_budget=$(( max_length - 3 - ${#suffix} ))
+  if (( pipeline_budget < 0 )); then
+    pipeline_budget=0
+  fi
+
+  local name="bk-${pipeline:0:pipeline_budget}${suffix}"
+  echo "${name:0:max_length}"
+}
+
+# Assume the IAM role $1, for duration $3, using the session name $2.
 # output: the Credentials portion of the AWS response JSON;
 #     {
 #         "SecretAccessKey": "foo"
@@ -41,11 +66,11 @@ main() {
 #     }
 assume_role_credentials() {
   local role="$1"
-  local build="$2"
+  local session_name="$2"
   local duration="$3"
   aws sts assume-role \
     --role-arn "$role" \
-    --role-session-name "aws-assume-role-buildkite-plugin-${build}" \
+    --role-session-name "$session_name" \
     --duration-seconds "$duration" \
     --query Credentials
 }
